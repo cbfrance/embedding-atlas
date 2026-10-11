@@ -585,6 +585,8 @@ def main(
     labels_resolved = None
     if labels is not None:
         labels_df = load_pandas_data(labels)
+        if "content" not in labels_df.columns:
+            labels_df = labels_df.rename(columns={"text": "content"})
         labels_resolved = labels_df.to_dict("records")
 
     # Compute PageRank from neighbor graph when requested or when --image is specified
