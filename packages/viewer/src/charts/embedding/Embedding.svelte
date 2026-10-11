@@ -4,7 +4,8 @@
   import { type Coordinator } from "@uwdata/mosaic-core";
   import * as SQL from "@uwdata/mosaic-sql";
 
-  import Overlay from "./Overlay.svelte";
+  import MapOverlay from "../notes/MapOverlay.svelte";
+  import { nearestTooltipPoint } from "../notes/map_tooltip.js";
   import Tooltip from "./Tooltip.svelte";
 
   import { type EmbeddingLegend } from "../../utils/database.js";
@@ -24,7 +25,7 @@
   }
 
   const CustomTooltip = createCustomComponentClass(Tooltip);
-  const CustomOverlay = createCustomComponentClass(Overlay);
+  const CustomOverlay = createCustomComponentClass(MapOverlay);
 </script>
 
 <script lang="ts">
@@ -313,7 +314,20 @@
       : undefined}
     customOverlay={{
       class: CustomOverlay,
-      props: { ...(overlayProps ?? { nodes: [], edges: [] }) },
+      props: {
+        ...(overlayProps ?? { nodes: [], edges: [] }),
+        context: context,
+        x: spec.data.x,
+        y: spec.data.y,
+        image: isDefaultTable && spec.posters ? spec.data.image : null,
+        nearest: isDefaultTable && (spec.nearestTooltip ?? false),
+        onNearest: async (id: RowID | null) => {
+          let point = await nearestTooltipPoint(context, spec.data, id);
+          if (point !== undefined) {
+            tooltip = point;
+          }
+        },
+      },
     }}
     viewportState={animatingViewport ?? chartState.viewport}
     onViewportState={(v) =>
@@ -331,6 +345,10 @@
       })}
     tooltip={tooltip}
     onTooltip={(v) => {
+      if (isDefaultTable && spec.nearestTooltip) {
+        tooltip = tooltip != null ? { ...tooltip } : null;
+        return;
+      }
       tooltip = v;
     }}
     selection={selection}

@@ -28,6 +28,8 @@ export interface EmbeddingSpec {
   /** Maximum number of points to render (for downsampling). Default: 4000000. Set to null to disable. */
   downsampleMaxPoints?: number | null;
   config?: EmbeddingViewConfig;
+  nearestTooltip?: boolean;
+  posters?: boolean;
 }
 
 export interface EmbeddingState {

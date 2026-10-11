@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { imageToDataUrl } from "@embedding-atlas/utils";
   import { makeClient } from "@uwdata/mosaic-core";
   import * as SQL from "@uwdata/mosaic-sql";
 
   import type { ChartViewProps, RowID } from "../chart.js";
+  import { imageCache } from "./image_cache.js";
   import { hasNoteColumns } from "./notes_api.js";
   import type { PosterGridSpec } from "./types.js";
 
@@ -18,7 +18,6 @@
 
   const GAP = 6;
   const LABEL_HEIGHT = 18;
-  const IMAGE_BATCH = 48;
 
   // svelte-ignore state_referenced_locally
   let highlight = context.highlight;
@@ -27,8 +26,13 @@
 
   let items = $state.raw<Item[]>([]);
   let total = $state(0);
-  let images = $state.raw(new Map<RowID, string | null>());
-  let pending = new Set<RowID>();
+  // svelte-ignore state_referenced_locally
+  let images = imageCache(context, spec.image);
+  let imagesVersion = images.version;
+
+  function imageFor(id: RowID, _version: number) {
+    return images.get(id);
+  }
 
   let scroller = $state.raw<HTMLDivElement | undefined>(undefined);
   let scrollTop = $state(0);
@@ -94,43 +98,8 @@
     };
   });
 
-  async function loadImages(ids: RowID[]) {
-    for (let id of ids) {
-      pending.add(id);
-    }
-    try {
-      let result = await context.coordinator.query(
-        SQL.Query.from(context.table)
-          .select({ id: SQL.column(context.id), image: SQL.column(spec.image) })
-          .where(
-            SQL.isIn(
-              SQL.column(context.id),
-              ids.map((id) => SQL.literal(id)),
-            ),
-          ),
-      );
-      let next = new Map(images);
-      for (let r of result.toArray()) {
-        next.set(r.id, r.image != null ? imageToDataUrl(r.image) : null);
-      }
-      for (let id of ids) {
-        if (!next.has(id)) {
-          next.set(id, null);
-        }
-      }
-      images = next;
-    } finally {
-      for (let id of ids) {
-        pending.delete(id);
-      }
-    }
-  }
-
   $effect(() => {
-    let missing = visible.map((v) => v.item.id).filter((id) => !images.has(id) && !pending.has(id));
-    for (let i = 0; i < missing.length; i += IMAGE_BATCH) {
-      loadImages(missing.slice(i, i + IMAGE_BATCH));
-    }
+    images.request(visible.map((v) => v.item.id));
   });
 
   $effect.pre(() => {
@@ -171,7 +140,7 @@
   >
     <div class="relative" style:height="{rowCount * rowHeight + GAP}px">
       {#each visible as { item, index } (item.id)}
-        {@const src = images.get(item.id)}
+        {@const src = imageFor(item.id, $imagesVersion)}
         <button
           class="absolute flex flex-col text-left rounded-md focus-visible:outline-2 outline-blue-600"
           style:left="{GAP + (index % columns) * (cellWidth + GAP)}px"
@@ -194,7 +163,7 @@
                   {item.status == 'skip' ? 'opacity-30 grayscale' : ''}"
                 draggable="false"
               />
-            {:else if images.has(item.id)}
+            {:else if src === null}
               <div class="p-1 text-xs text-slate-500 dark:text-slate-400">{item.label ?? ""}</div>
             {/if}
             {#if item.starred}

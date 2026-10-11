@@ -12,7 +12,11 @@ A fork of [apple/embedding-atlas](https://github.com/apple/embedding-atlas) that
   - `notes`: edits the notes of the last selected point. Spec: `{type: "notes", key, labelField?, endpoint?}`.
   - `poster-grid`: a virtualized image grid of the filtered rows. Spec: `{type: "poster-grid", image, labelField?, sort?, cellWidth?, limit?}`. Images load for the visible rows only.
 
-Changes to upstream files are kept to a few lines: `cli.py` (options), `server.py` (mount), `chart_types.ts` (one register call).
+- `packages/viewer/src/charts/notes/MapOverlay.svelte`: replaces the map overlay (it still draws Atlas's neighbor overlay).
+  - `posters: true` on an `embedding` spec draws `data.image` at each point once zoomed in far enough to fit it (up to 200 posters, nearest to the center).
+  - `nearestTooltip: true` shows the tooltip for the nearest point anywhere on the map, with a dashed line from the cursor. The lookup is a client-side Delaunay index over the filtered points.
+
+Changes to upstream files are kept to a few lines: `cli.py` (options), `server.py` (mount), `chart_types.ts` (one register call), `embedding/Embedding.svelte` (overlay props and tooltip handling) and `embedding/types.ts` (two spec options).
 
 ## Sync with upstream
 
