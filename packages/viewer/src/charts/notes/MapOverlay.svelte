@@ -18,21 +18,29 @@
     x: string;
     y: string;
     image?: string | null;
-    nearest: boolean;
+    posters: boolean;
+    nearest: boolean | { title?: string; details?: string[] } | null;
     onNearest: (id: RowID | null) => void;
   }
 
-  let { nodes, edges, proxy, context, x, y, image, nearest, onNearest }: Props = $props();
+  let { nodes, edges, proxy, context, x, y, image, posters: showPosters, nearest, onNearest }: Props = $props();
 
   const MAX_POSTERS = 200;
   const MIN_POSTER_WIDTH = 22;
   const MAX_POSTER_WIDTH = 96;
+  const CARD_WIDTH = 240;
+  const CARD_IMAGE_WIDTH = 64;
+  const CARD_OFFSET = 14;
 
   let ids = $state.raw<RowID[]>([]);
   let xs = $state.raw<Float64Array>(new Float64Array());
   let ys = $state.raw<Float64Array>(new Float64Array());
   let delaunay = $state.raw<Delaunay<number> | null>(null);
   let spacing = $state(0);
+  let titles = $state.raw<(string | null)[]>([]);
+  let details = $state.raw<string[][]>([]);
+
+  let cardFields = $derived(typeof nearest == "object" && nearest != null ? nearest : {});
 
   let root = $state.raw<HTMLDivElement | undefined>(undefined);
   let cursor = $state.raw<{ x: number; y: number } | null>(null);
@@ -55,6 +63,8 @@
           id: SQL.column(context.id),
           x: SQL.column(x),
           y: SQL.column(y),
+          ...(cardFields.title != null ? { __title: SQL.column(cardFields.title) } : {}),
+          ...Object.fromEntries((cardFields.details ?? []).map((f, i) => [`__detail${i}`, SQL.column(f)])),
         });
         return predicate ? q.where(predicate) : q;
       },
@@ -63,6 +73,10 @@
         ids = rows.map((r: any) => r.id);
         xs = Float64Array.from(rows, (r: any) => r.x);
         ys = Float64Array.from(rows, (r: any) => r.y);
+        titles = rows.map((r: any) => r.__title ?? null);
+        details = rows.map((r: any) =>
+          (cardFields.details ?? []).map((_, i) => formatValue(r[`__detail${i}`])).filter((v) => v != ""),
+        );
         let d =
           rows.length >= 3
             ? Delaunay.from(
@@ -78,6 +92,16 @@
     });
     return () => client.destroy();
   });
+
+  function formatValue(value: any): string {
+    if (value == null) {
+      return "";
+    }
+    if (typeof value == "object" && typeof value[Symbol.iterator] == "function") {
+      return Array.from(value as Iterable<any>).join(", ");
+    }
+    return String(value);
+  }
 
   function medianNeighborDistance(d: Delaunay<number>): number {
     let { points, halfedges, triangles } = d;
@@ -103,7 +127,7 @@
   let posterWidth = $derived(Math.min(MAX_POSTER_WIDTH, Math.abs(transform.kx) * spacing * 1.1));
 
   let posters = $derived.by(() => {
-    if (images == null || posterWidth < MIN_POSTER_WIDTH) {
+    if (images == null || !showPosters || posterWidth < MIN_POSTER_WIDTH) {
       return [];
     }
     let { ox, oy, kx, ky } = transform;
@@ -147,6 +171,9 @@
     if (index != nearestIndex) {
       nearestIndex = index;
       onNearest(ids[index]);
+      if (images != null && posters.length == 0) {
+        images.request([ids[index]]);
+      }
     }
   }
 
@@ -189,6 +216,42 @@
     }
     return proxy.location(xs[nearestIndex], ys[nearestIndex]);
   });
+
+  function portal(node: HTMLElement) {
+    document.body.appendChild(node);
+    return {
+      destroy() {
+        node.remove();
+      },
+    };
+  }
+
+  let card = $derived.by(() => {
+    if (cursor == null || nearestIndex == null || nearestIndex >= ids.length) {
+      return null;
+    }
+    let withImage = images != null && posters.length == 0;
+    let height = withImage ? CARD_IMAGE_WIDTH * 1.5 + 16 : 16 + 18 * (1 + details[nearestIndex].length);
+    let left = cursor.x + CARD_OFFSET;
+    let top = cursor.y + CARD_OFFSET;
+    if (left + CARD_WIDTH > proxy.width) {
+      left = cursor.x - CARD_OFFSET - CARD_WIDTH;
+    }
+    if (top + height > proxy.height) {
+      top = Math.max(4, cursor.y - CARD_OFFSET - height);
+    }
+    let rect = root?.getBoundingClientRect();
+    return {
+      id: ids[nearestIndex],
+      pageLeft: (rect?.left ?? 0) + left,
+      pageTop: (rect?.top ?? 0) + top,
+      title: titles[nearestIndex],
+      details: details[nearestIndex],
+      withImage,
+      left,
+      top,
+    };
+  });
 </script>
 
 <div bind:this={root} style:width="{proxy.width}px" style:height="{proxy.height}px" style:position="relative">
@@ -225,5 +288,36 @@
         stroke-dasharray="3 3"
       />
     </svg>
+  {/if}
+  {#if card != null && (card.title != null || card.details.length > 0)}
+    {@const src = card.withImage ? imageFor(card.id, $imagesVersion) : null}
+    <div
+      use:portal
+      class="fixed z-50 flex gap-2 p-2 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-md text-xs text-slate-500 dark:text-slate-400 pointer-events-none"
+      style:width="{CARD_WIDTH}px"
+      style:transform="translate({card.pageLeft}px, {card.pageTop}px)"
+      style:left="0"
+      style:top="0"
+    >
+      {#if card.withImage}
+        <div
+          class="shrink-0 rounded-sm overflow-hidden bg-slate-200 dark:bg-slate-700"
+          style:width="{CARD_IMAGE_WIDTH}px"
+          style:height="{CARD_IMAGE_WIDTH * 1.5}px"
+        >
+          {#if src}
+            <img src={src} alt="" class="w-full h-full object-cover" />
+          {/if}
+        </div>
+      {/if}
+      <div class="flex flex-col gap-0.5 min-w-0">
+        {#if card.title != null}
+          <div class="font-medium text-sm leading-tight text-slate-900 dark:text-slate-100">{card.title}</div>
+        {/if}
+        {#each card.details as line}
+          <div class="leading-snug line-clamp-2">{line}</div>
+        {/each}
+      </div>
+    </div>
   {/if}
 </div>

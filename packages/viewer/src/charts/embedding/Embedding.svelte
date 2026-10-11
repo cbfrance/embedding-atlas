@@ -4,6 +4,7 @@
   import { type Coordinator } from "@uwdata/mosaic-core";
   import * as SQL from "@uwdata/mosaic-sql";
 
+  import EmptyTooltip from "../notes/EmptyTooltip.svelte";
   import MapOverlay from "../notes/MapOverlay.svelte";
   import { nearestTooltipPoint } from "../notes/map_tooltip.js";
   import Tooltip from "./Tooltip.svelte";
@@ -26,6 +27,7 @@
 
   const CustomTooltip = createCustomComponentClass(Tooltip);
   const CustomOverlay = createCustomComponentClass(MapOverlay);
+  const CustomEmptyTooltip = createCustomComponentClass(EmptyTooltip);
 </script>
 
 <script lang="ts">
@@ -285,33 +287,35 @@
     additionalFields={isDefaultTable
       ? Object.fromEntries((context.tables[context.table]?.columns ?? []).map((c) => [c.name, c.name]))
       : {}}
-    customTooltip={isDefaultTable
-      ? {
-          class: CustomTooltip,
-          props: {
-            context: context,
-            darkMode: $colorScheme,
-            columnStyles: $columnStyles,
-            onNearestNeighborSearch: spec.data.neighbors
-              ? async (id: any) => {
-                  let neighbors = await nearestNeighbors(id);
-                  let nids = neighbors.map((x) => x.id);
-                  searcher.search(
-                    {
-                      label: "Neighbors of #" + id,
-                      items: neighbors,
-                      overlay: {
-                        nodes: [id, ...nids],
-                        edges: nids.map((ni) => ({ start: id, end: ni })),
+    customTooltip={isDefaultTable && spec.nearestTooltip
+      ? { class: CustomEmptyTooltip, props: {} }
+      : isDefaultTable
+        ? {
+            class: CustomTooltip,
+            props: {
+              context: context,
+              darkMode: $colorScheme,
+              columnStyles: $columnStyles,
+              onNearestNeighborSearch: spec.data.neighbors
+                ? async (id: any) => {
+                    let neighbors = await nearestNeighbors(id);
+                    let nids = neighbors.map((x) => x.id);
+                    searcher.search(
+                      {
+                        label: "Neighbors of #" + id,
+                        items: neighbors,
+                        overlay: {
+                          nodes: [id, ...nids],
+                          edges: nids.map((ni) => ({ start: id, end: ni })),
+                        },
                       },
-                    },
-                    "raw",
-                  );
-                }
-              : undefined,
-          },
-        }
-      : undefined}
+                      "raw",
+                    );
+                  }
+                : undefined,
+            },
+          }
+        : undefined}
     customOverlay={{
       class: CustomOverlay,
       props: {
@@ -319,8 +323,9 @@
         context: context,
         x: spec.data.x,
         y: spec.data.y,
-        image: isDefaultTable && spec.posters ? spec.data.image : null,
-        nearest: isDefaultTable && (spec.nearestTooltip ?? false),
+        image: isDefaultTable ? spec.data.image : null,
+        posters: spec.posters ?? false,
+        nearest: isDefaultTable && spec.nearestTooltip ? spec.nearestTooltip : null,
         onNearest: async (id: RowID | null) => {
           let point = await nearestTooltipPoint(context, spec.data, id);
           if (point !== undefined) {
