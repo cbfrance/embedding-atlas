@@ -30,6 +30,7 @@ import type { FeaturesListSpec, FeaturesListState } from "./features/types.js";
 import { isFeaturesColumn } from "./features/utils.js";
 import type { InstancesSpec } from "./instances/types.js";
 import type { ParallelCoordinatesSpec, ParallelCoordinatesState } from "./parallel_coordinates/types.js";
+import { registerNotesCharts } from "./notes/register.js";
 import type { ChartSpec, ChartState } from "./spec/spec.js";
 
 export type ChartComponent = Component<ChartViewProps<any, any>, {}, "">;
@@ -100,6 +101,7 @@ registerChartType("features-list", FeaturesList);
 registerChartType("predicates", Predicates);
 registerChartType("markdown", Markdown, { supportsEditMode: true });
 registerChartType("content-viewer", ContentViewer);
+registerNotesCharts(registerChartType, registerChartBuilder);
 
 // Spec type for all builtin chart types
 export type BuiltinChartSpec =

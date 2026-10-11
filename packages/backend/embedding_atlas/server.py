@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .data_source import DataSource
+from .notes import NotesStore, mount_notes
 from .utils import arrow_to_bytes, to_parquet_bytes
 
 
@@ -26,6 +27,7 @@ def make_server(
     mcp: bool = False,
     cors: bool | list[str] = False,
     duckdb_uri: str | None = None,
+    notes: NotesStore | None = None,
 ):
     """Creates a server for hosting Embedding Atlas"""
 
@@ -214,6 +216,11 @@ def make_server(
 
     if mcp:
         make_mcp_proxy(app)
+
+    if notes is not None:
+        if duckdb_connection is None:
+            raise ValueError("notes require the server DuckDB connection")
+        mount_notes(app, notes, duckdb_connection)
 
     # Static files for the frontend
     app.mount("/", StaticFiles(directory=static_path, html=True))

@@ -16,6 +16,7 @@ import uvicorn
 
 from .cache import sha256_hexdigest
 from .data_source import DataSource
+from .notes import NotesStore
 from .options import make_embedding_atlas_props
 from .server import make_server
 from .utils import (
@@ -400,6 +401,19 @@ def import_modules(names: list[str]):
     "they replace the default charts.",
 )
 @click.option(
+    "--notes",
+    "notes_path",
+    type=str,
+    default=None,
+    help="Read and write personal notes (starred, status, comment, labels) in this JSON file. Requires --notes-key and --duckdb server.",
+)
+@click.option(
+    "--notes-key",
+    type=str,
+    default=None,
+    help="Column that identifies a row in the notes file (e.g., imdb_id).",
+)
+@click.option(
     "--mcp/--no-mcp",
     "enable_mcp",
     default=False,
@@ -451,6 +465,8 @@ def main(
     stop_words: str | None,
     labels: str | None,
     initial_state: dict | None,
+    notes_path: str | None,
+    notes_key: str | None,
     enable_mcp: bool,
 ):
     apply_logging_config()
@@ -459,6 +475,15 @@ def main(
         import_modules(with_modules)
 
     df = load_datasets(inputs, splits=split, query=query, sample=sample)
+
+    notes = None
+    if notes_path is not None:
+        if notes_key is None:
+            raise click.BadParameter("--notes requires --notes-key")
+        if duckdb != "server":
+            raise click.BadParameter("--notes requires --duckdb server")
+        notes = NotesStore(notes_path, notes_key)
+        df = notes.apply(df)
 
     print(df)
 
@@ -706,6 +731,7 @@ def main(
         duckdb_uri=duckdb,
         mcp=enable_mcp,
         cors=cors_config,
+        notes=notes,
     )
 
     if enable_auto_port:
