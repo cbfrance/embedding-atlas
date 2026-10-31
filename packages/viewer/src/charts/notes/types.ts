@@ -17,3 +17,13 @@ export interface PosterGridSpec {
   cellWidth?: number;
   limit?: number;
 }
+
+export interface DetailSpec {
+  type: "detail";
+  title?: string;
+  titleField?: string;
+  bodyField: string;
+  metaFields?: string[];
+  sections?: string[];
+  linkFields?: string[];
+}

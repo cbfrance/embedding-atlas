@@ -379,9 +379,24 @@
 
   function onWheel(e: WheelEvent) {
     e.preventDefault();
-    let { x, y } = localCoordinates(e);
-    let scaler = Math.exp(-e.deltaY / 200);
-    onZoom(scaler, { x, y });
+    if (e.ctrlKey || e.metaKey) {
+      let { x, y } = localCoordinates(e);
+      onZoom(Math.exp(-e.deltaY / 100), { x, y });
+      return;
+    }
+    onPan(e.deltaX, e.deltaY);
+  }
+
+  function onPan(dx: number, dy: number) {
+    let { x, y, scale } = resolvedViewportState;
+    setTooltip(null);
+    let rect = canvas!.getBoundingClientRect();
+    let sz = Math.max(rect.width, rect.height);
+    setViewportState({
+      x: x + ((dx / sz) * 2) / scale,
+      y: y - ((dy / sz) * 2) / scale,
+      scale: scale,
+    });
   }
 
   function onZoom(scaler: number, position: Point) {

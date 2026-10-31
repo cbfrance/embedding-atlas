@@ -66,7 +66,7 @@
   let { colorScheme, userColorScheme, activePanel, currentLayout, canUndo, canRedo } = store;
 
   $effect.pre(() => {
-    $userColorScheme = colorSchemeProp;
+    if (colorSchemeProp != null) $userColorScheme = colorSchemeProp;
   });
 
   let container: HTMLDivElement;

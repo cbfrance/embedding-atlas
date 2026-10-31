@@ -2,9 +2,10 @@ import type { Component } from "svelte";
 
 import type { UIElement } from "../builder/builder_description.js";
 import type { ChartBuilderDescription, ChartViewProps } from "../chart.js";
+import Detail from "./Detail.svelte";
 import Notes from "./Notes.svelte";
 import PosterGrid from "./PosterGrid.svelte";
-import type { NotesSpec, PosterGridSpec } from "./types.js";
+import type { DetailSpec, NotesSpec, PosterGridSpec } from "./types.js";
 
 type Register = (type: string, component: Component<ChartViewProps<any, any>, {}, "">) => void;
 type RegisterBuilder = <Spec, T extends readonly UIElement[]>(builder: ChartBuilderDescription<Spec, T>) => void;
@@ -12,6 +13,23 @@ type RegisterBuilder = <Spec, T extends readonly UIElement[]>(builder: ChartBuil
 export function registerNotesCharts(registerChartType: Register, registerChartBuilder: RegisterBuilder) {
   registerChartType("notes", Notes);
   registerChartType("poster-grid", PosterGrid);
+  registerChartType("detail", Detail);
+
+  registerChartBuilder({
+    icon: "chart-content-viewer",
+    description: "Create a pane that shows the last selected point in full",
+    preview: false,
+    ui: [
+      { label: "Title", field: { key: "title" } },
+      { label: "Body", field: { key: "body", required: true } },
+    ] as const,
+    create: ({ title, body }): DetailSpec | undefined => ({
+      type: "detail",
+      title: "Detail",
+      titleField: title?.name,
+      bodyField: body.name,
+    }),
+  });
 
   registerChartBuilder({
     icon: "chart-cards",
