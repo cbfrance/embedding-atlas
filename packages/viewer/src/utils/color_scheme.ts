@@ -21,7 +21,7 @@ function storedColorScheme(): ColorScheme | null {
 }
 
 export function makeColorSchemeStore() {
-  let userColorScheme = writable<ColorScheme | undefined | null>(storedColorScheme());
+  let userColorScheme = writable<ColorScheme | undefined | null>(storedColorScheme() ?? "dark");
   userColorScheme.subscribe((v) => {
     if (typeof localStorage === "undefined") return;
     if (v == "light" || v == "dark") localStorage.setItem(STORAGE_KEY, v);

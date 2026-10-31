@@ -15,7 +15,7 @@ A fork of [apple/embedding-atlas](https://github.com/apple/embedding-atlas) that
 - `packages/viewer/src/charts/notes/Detail.svelte`: chart type `detail` shows the last clicked point in full. Spec: `{type: "detail", titleField?, bodyField, metaFields?, sections?, linkFields?}`. Link fields render as anchors; `zed://` and `obsidian://` links open the file in that app.
 - Click anywhere on the map with `nearestTooltip` on selects the nearest point (the one the dashed line points at), so the Detail and Notes panes follow it (`MapOverlay.svelte` `onPick`, one prop in `Embedding.svelte`).
 - Map scrolling: a two-finger trackpad scroll pans the map; pinch (or Ctrl/Cmd + scroll) zooms. Upstream zooms on every scroll. Change in `packages/component/src/lib/embedding_view/EmbeddingViewImpl.svelte` (`onWheel`, `onPan`).
-- Color scheme: the Light/Dark choice from the side bar is saved in localStorage (`embedding-atlas-color-scheme`) and restored on load (`utils/color_scheme.ts`, one line in `EmbeddingAtlas.svelte`).
+- Color scheme: the Light/Dark choice from the side bar is saved in localStorage (`embedding-atlas-color-scheme`) and restored on load; with no saved choice the default is Dark (`utils/color_scheme.ts`, one line in `EmbeddingAtlas.svelte`).
 - `packages/viewer/src/charts/notes/MapOverlay.svelte`: replaces the map overlay (it still draws Atlas's neighbor overlay).
   - `posters: true` on an `embedding` spec draws `data.image` at each point once zoomed in far enough to fit it (up to 200 posters, nearest to the center).
   - `nearestTooltip: true` shows the tooltip for the nearest point anywhere on the map, with a dashed line from the cursor. The lookup is a client-side Delaunay index over the filtered points.
