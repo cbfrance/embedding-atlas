@@ -21,9 +21,10 @@
     posters: boolean;
     nearest: boolean | { title?: string; details?: string[] } | null;
     onNearest: (id: RowID | null) => void;
+    onPick?: (id: RowID) => void;
   }
 
-  let { nodes, edges, proxy, context, x, y, image, posters: showPosters, nearest, onNearest }: Props = $props();
+  let { nodes, edges, proxy, context, x, y, image, posters: showPosters, nearest, onNearest, onPick }: Props = $props();
 
   const MAX_POSTERS = 200;
   const MIN_POSTER_WIDTH = 22;
@@ -202,10 +203,35 @@
       updateNearest(e.clientX, e.clientY);
     };
     let onLeave = () => clearNearest();
+    let down: { x: number; y: number } | null = null;
+    let onDown = (e: PointerEvent) => {
+      down = { x: e.clientX, y: e.clientY };
+    };
+    let onUp = (e: PointerEvent) => {
+      let start = down;
+      down = null;
+      if (start == null || onPick == null || nearestIndex == null || nearestIndex >= ids.length) {
+        return;
+      }
+      if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 4) {
+        return;
+      }
+      let map = root?.parentElement?.parentElement?.parentElement;
+      let target = e.target as Element | null;
+      if (map == null || target == null || target.closest("svg")?.parentElement !== map) {
+        return;
+      }
+      let id = ids[nearestIndex];
+      setTimeout(() => onPick?.(id), 0);
+    };
     window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointerup", onUp);
     document.addEventListener("pointerleave", onLeave);
     return () => {
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerup", onUp);
       document.removeEventListener("pointerleave", onLeave);
     };
   });

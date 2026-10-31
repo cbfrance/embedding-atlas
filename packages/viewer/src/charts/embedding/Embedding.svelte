@@ -332,6 +332,7 @@
             tooltip = point;
           }
         },
+        onPick: (id: RowID) => highlightStore.set([id]),
       },
     }}
     viewportState={animatingViewport ?? chartState.viewport}
