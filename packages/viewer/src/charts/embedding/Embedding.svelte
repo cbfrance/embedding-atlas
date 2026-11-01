@@ -281,6 +281,7 @@
       ...(spec.minimumDensity != null ? { minimumDensity: spec.minimumDensity } : {}),
       ...(spec.pointSize != null ? { pointSize: spec.pointSize } : {}),
       downsampleMaxPoints: spec.downsampleMaxPoints ?? defaultDownsampleMaxPoints,
+      ...spec.config,
     }}
     labels={context.embeddingViewLabels}
     cache={context.persistentCache}
@@ -325,6 +326,7 @@
         y: spec.data.y,
         image: isDefaultTable ? spec.data.image : null,
         posters: spec.posters ?? false,
+        pointTitles: spec.pointTitles ?? false,
         nearest: isDefaultTable && spec.nearestTooltip ? spec.nearestTooltip : null,
         onNearest: async (id: RowID | null) => {
           let point = await nearestTooltipPoint(context, spec.data, id);

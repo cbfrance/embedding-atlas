@@ -30,6 +30,8 @@ export interface EmbeddingSpec {
   config?: EmbeddingViewConfig;
   nearestTooltip?: boolean | { title?: string; details?: string[] };
   posters?: boolean;
+  /** Show each point's tooltip title beside it once zoomed in far enough to read them. */
+  pointTitles?: boolean;
 }
 
 export interface EmbeddingState {

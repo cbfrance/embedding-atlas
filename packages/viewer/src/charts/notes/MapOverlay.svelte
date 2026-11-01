@@ -19,12 +19,13 @@
     y: string;
     image?: string | null;
     posters: boolean;
+    pointTitles?: boolean;
     nearest: boolean | { title?: string; details?: string[] } | null;
     onNearest: (id: RowID | null) => void;
     onPick?: (id: RowID) => void;
   }
 
-  let { nodes, edges, proxy, context, x, y, image, posters: showPosters, nearest, onNearest, onPick }: Props = $props();
+  let { nodes, edges, proxy, context, x, y, image, posters: showPosters, pointTitles: showTitles, nearest, onNearest, onPick }: Props = $props();
 
   const MAX_POSTERS = 200;
   const MIN_POSTER_WIDTH = 22;
@@ -32,6 +33,10 @@
   const CARD_WIDTH = 240;
   const CARD_IMAGE_WIDTH = 64;
   const CARD_OFFSET = 14;
+  const MAX_TITLES = 150;
+  const MIN_TITLE_SPACING = 28;
+  const TITLE_WIDTH = 220;
+  const TITLE_HEIGHT = 30;
 
   let ids = $state.raw<RowID[]>([]);
   let xs = $state.raw<Float64Array>(new Float64Array());
@@ -153,6 +158,43 @@
 
   $effect(() => {
     images?.request(posters.map((p) => ids[p.index]));
+  });
+
+  let pointTitles = $derived.by(() => {
+    if (!showTitles || Math.abs(transform.kx) * spacing < MIN_TITLE_SPACING) {
+      return [];
+    }
+    let { ox, oy, kx, ky } = transform;
+    let w = proxy.width;
+    let h = proxy.height;
+    let visible: { index: number; sx: number; sy: number; d: number }[] = [];
+    for (let i = 0; i < ids.length; i++) {
+      if (titles[i] == null) {
+        continue;
+      }
+      let sx = ox + kx * xs[i];
+      let sy = oy + ky * ys[i];
+      if (sx < 0 || sx > w || sy < 0 || sy > h) {
+        continue;
+      }
+      visible.push({ index: i, sx, sy, d: (sx - w / 2) ** 2 + (sy - h / 2) ** 2 });
+    }
+    visible.sort((a, b) => a.d - b.d);
+    let placed: { index: number; left: number; top: number }[] = [];
+    for (let v of visible) {
+      if (placed.length >= MAX_TITLES) {
+        break;
+      }
+      let left = v.sx + 8;
+      let top = v.sy - TITLE_HEIGHT / 2;
+      let clash = placed.some(
+        (p) => left < p.left + TITLE_WIDTH && p.left < left + TITLE_WIDTH && top < p.top + TITLE_HEIGHT && p.top < top + TITLE_HEIGHT,
+      );
+      if (!clash) {
+        placed.push({ index: v.index, left, top });
+      }
+    }
+    return placed;
   });
 
   function updateNearest(clientX: number, clientY: number) {
@@ -296,6 +338,19 @@
             style:transform="translate({p.sx - posterWidth / 2}px, {p.sy - posterWidth * 0.75}px)"
           />
         {/if}
+      {/each}
+    </div>
+  {/if}
+  {#if pointTitles.length > 0}
+    <div style:position="absolute" style:inset="0" style:overflow="hidden" class="pointer-events-none">
+      {#each pointTitles as t (ids[t.index])}
+        <div
+          class="absolute left-0 top-0 text-xs leading-tight line-clamp-2 text-slate-700 dark:text-slate-200 [text-shadow:0_0_3px_white] dark:[text-shadow:0_0_3px_black]"
+          style:width="{TITLE_WIDTH}px"
+          style:transform="translate({t.left}px, {t.top}px)"
+        >
+          {titles[t.index]}
+        </div>
       {/each}
     </div>
   {/if}

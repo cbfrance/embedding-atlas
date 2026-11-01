@@ -47,3 +47,6 @@ rm -rf packages/backend/embedding_atlas/static && cp -r packages/viewer/dist pac
 - Tables show `columns` in the order the spec lists them (upstream used dataset order).
 - Detail and Notes have a Pin button (`PinButton.svelte`). A pinned panel keeps its point while the selection changes; unpinning jumps to the current selection.
 - Detail `similar: {vectorField, textField, metaField?, limit?}` lists the nearest rows by `list_cosine_similarity` in DuckDB. Clicking one selects it. An exact scan over 8,826 rows takes about 7 ms, so no vss index is used.
+- Map config `pointOpacity` (0 to 1) draws points at a fixed opacity instead of fading with density; `pointSizeZoomMax` grows `pointSize` as the view zooms in, up to that factor. Chart specs pass `config` through to the map.
+- Category colors use a palette validated for color-blind separation, eight slots per mode, with a neutral Other color; maps fold past eight categories into Other.
+- Map spec `pointTitles: true` writes each point's tooltip title beside it once points are far enough apart to read, skipping titles that would overlap (`MapOverlay.svelte`). Per-point labels through `--labels` do not scale: placement compares every pair of labels.

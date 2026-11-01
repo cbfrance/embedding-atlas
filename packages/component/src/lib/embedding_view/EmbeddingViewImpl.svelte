@@ -50,6 +50,8 @@
     pixelHeight: number,
     pixelRatio: number,
     userPointSize: number | null,
+    userPointOpacity: number | null,
+    pointSizeZoomMax: number | null,
   ) {
     // Convert max density to per unit point (aka., CSS px unit).
     let viewDimension = Math.max(pixelWidth, pixelHeight) / pixelRatio;
@@ -68,7 +70,8 @@
     let pointSize: number;
     if (userPointSize != null) {
       // Use user-provided point size, scaled by pixel ratio
-      pointSize = userPointSize * pixelRatio;
+      let zoom = pointSizeZoomMax != null ? Math.min(pointSizeZoomMax, Math.max(1, Math.exp((scaleLevel - thresholdLevel) / 2))) : 1;
+      pointSize = userPointSize * zoom * pixelRatio;
     } else {
       // Use automatic calculation based on density
       let pointSizeAtThreshold = 0.25 / Math.sqrt(maxPointDensity);
@@ -83,8 +86,8 @@
       densityAlpha,
       contoursAlpha: densityAlpha,
       pointSize,
-      pointAlpha: 0.7,
-      pointsAlpha: pointsAlpha,
+      pointAlpha: userPointOpacity != null ? Math.min(0.99, Math.max(0, userPointOpacity)) : 0.7,
+      pointsAlpha: userPointOpacity != null ? 1 : pointsAlpha,
       densityBandwidth: 20,
     };
   }
@@ -215,6 +218,8 @@
 
   let minimumDensity = $derived(config?.minimumDensity ?? 1 / 16);
   let userPointSize = $derived(config?.pointSize ?? null);
+  let userPointOpacity = $derived(config?.pointOpacity ?? null);
+  let pointSizeZoomMax = $derived(config?.pointSizeZoomMax ?? null);
   let mode = $derived(config?.mode ?? "points");
   let autoLabelEnabled = $derived(config?.autoLabelEnabled);
   let downsampleMaxPoints = $derived(config?.downsampleMaxPoints ?? 4000000);
@@ -229,6 +234,8 @@
       pixelHeight,
       pixelRatio,
       userPointSize,
+      userPointOpacity,
+      pointSizeZoomMax,
     ),
   );
 

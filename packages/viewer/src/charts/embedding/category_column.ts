@@ -35,7 +35,7 @@ export async function makeCategoryColumn(
   }
   let jsType = jsTypeFromDBType(desc.column_type);
   if (jsType == "string") {
-    return await makeDiscreteCategoryColumn(coordinator, table, column, 10, theme);
+    return await makeDiscreteCategoryColumn(coordinator, table, column, 8, theme);
   } else if (jsType == "number" || jsType == "Date") {
     // Floating-point columns are treated as continuous regardless of cardinality.
     // Sorting a handful of fractional scores by frequency reads as arbitrary, while
@@ -45,8 +45,8 @@ export async function makeCategoryColumn(
       return await makeBinnedNumericColumn(coordinator, table, column, theme);
     }
     let distinct = await distinctCount(coordinator, table, column);
-    if (distinct <= 10) {
-      return await makeDiscreteCategoryColumn(coordinator, table, column, 10, theme);
+    if (distinct <= 8) {
+      return await makeDiscreteCategoryColumn(coordinator, table, column, 8, theme);
     } else {
       return await makeBinnedNumericColumn(coordinator, table, column, theme);
     }

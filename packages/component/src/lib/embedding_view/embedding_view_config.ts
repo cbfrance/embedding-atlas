@@ -15,6 +15,12 @@ export interface EmbeddingViewConfig {
    * If not specified, point size is calculated based on density. */
   pointSize?: number | null;
 
+  /** Opacity of each point, from 0 to 1. If not specified, points fade with density. */
+  pointOpacity?: number | null;
+
+  /** Grow `pointSize` as the view zooms in, up to this many times its size. */
+  pointSizeZoomMax?: number | null;
+
   /** Generate labels automatically.
    * By default labels are generated automatically if the `labels` prop is not specified,
    * and a `text` column is specified in the Mosaic view,
