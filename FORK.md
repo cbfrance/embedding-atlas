@@ -45,3 +45,5 @@ rm -rf packages/backend/embedding_atlas/static && cp -r packages/viewer/dist pac
 - Panel resize handles sit in the gap between panels (`DashboardChartPanel.svelte`, `RESIZER_OFFSET = -4`, `RESIZER_SIZE = 6`), so they no longer cover a panel's bottom controls such as the map's selection buttons.
 - The add-widget menu shows a name under each icon (`name` on `ChartBuilderDescription`). Builder fields can list `preferred` column names, picked by default when present: Detail picks `text` and `doc_text`, Notes picks `id` and `doc_title`.
 - Tables show `columns` in the order the spec lists them (upstream used dataset order).
+- Detail and Notes have a Pin button (`PinButton.svelte`). A pinned panel keeps its point while the selection changes; unpinning jumps to the current selection.
+- Detail `similar: {vectorField, textField, metaField?, limit?}` lists the nearest rows by `list_cosine_similarity` in DuckDB. Clicking one selects it. An exact scan over 8,826 rows takes about 7 ms, so no vss index is used.

@@ -3,7 +3,10 @@
 
   import Input from "../../widgets/Input.svelte";
   import SegmentedControl from "../../widgets/SegmentedControl.svelte";
+  import { get } from "svelte/store";
+
   import Container from "../common/Container.svelte";
+  import PinButton from "./PinButton.svelte";
 
   import type { ChartViewProps, RowID } from "../chart.js";
   import { DEFAULT_NOTES_ENDPOINT, hasNoteColumns, noteFromRow, saveNote, type Note } from "./notes_api.js";
@@ -55,15 +58,30 @@
     error = null;
   }
 
+  let pinned = $state(false);
+
+  function follow(ids: RowID[] | null) {
+    let id = ids != null && ids.length > 0 ? ids[ids.length - 1] : null;
+    if (id == null || !available) {
+      return;
+    }
+    load(id).catch((e) => {
+      error = String(e);
+    });
+  }
+
+  function togglePin() {
+    pinned = !pinned;
+    if (!pinned) {
+      follow(get(context.highlight));
+    }
+  }
+
   $effect.pre(() =>
     context.highlight.subscribe((ids) => {
-      let id = ids != null && ids.length > 0 ? ids[ids.length - 1] : null;
-      if (id == null || !available) {
-        return;
+      if (!pinned) {
+        follow(ids);
       }
-      load(id).catch((e) => {
-        error = String(e);
-      });
     }),
   );
 
@@ -129,9 +147,10 @@
   {:else}
     {@const note = row.note}
     <div class="flex flex-col gap-2">
-      {#if row.label != null}
-        <div class="font-medium truncate" title={row.label}>{row.label}</div>
-      {/if}
+      <div class="flex items-center gap-2">
+        <div class="flex-1 font-medium truncate" title={row.label ?? ""}>{row.label ?? ""}</div>
+        <PinButton pinned={pinned} onToggle={togglePin} />
+      </div>
       <div class="flex items-center gap-2">
         <button
           class="rounded-md px-2 h-[28px] border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 select-none

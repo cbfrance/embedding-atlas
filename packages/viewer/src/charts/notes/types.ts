@@ -27,4 +27,6 @@ export interface DetailSpec {
   metaFields?: string[];
   sections?: string[];
   linkFields?: string[];
+  /** Lists the rows nearest to the shown one by cosine similarity of a vector column. */
+  similar?: { vectorField: string; textField: string; metaField?: string; limit?: number };
 }
