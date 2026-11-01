@@ -22,6 +22,7 @@ export interface DetailSpec {
   type: "detail";
   title?: string;
   titleField?: string;
+  quoteField?: string;
   bodyField: string;
   metaFields?: string[];
   sections?: string[];

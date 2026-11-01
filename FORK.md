@@ -12,7 +12,7 @@ A fork of [apple/embedding-atlas](https://github.com/apple/embedding-atlas) that
   - `notes`: edits the notes of the last selected point. Spec: `{type: "notes", key, labelField?, endpoint?}`.
   - `poster-grid`: a virtualized image grid of the filtered rows. Spec: `{type: "poster-grid", image, labelField?, sort?, cellWidth?, limit?}`. Images load for the visible rows only.
 
-- `packages/viewer/src/charts/notes/Detail.svelte`: chart type `detail` shows the last clicked point in full. Spec: `{type: "detail", titleField?, bodyField, metaFields?, sections?, linkFields?}`. Link fields render as anchors; `zed://` and `obsidian://` links open the file in that app.
+- `packages/viewer/src/charts/notes/Detail.svelte`: chart type `detail` shows the last clicked point in full. Spec: `{type: "detail", titleField?, quoteField?, bodyField, metaFields?, sections?, linkFields?}`. `quoteField` renders as a large pull quote under the title. Link fields render as anchors; `zed://` and `obsidian://` links open the file in that app.
 - Click anywhere on the map with `nearestTooltip` on selects the nearest point (the one the dashed line points at), so the Detail and Notes panes follow it (`MapOverlay.svelte` `onPick`, one prop in `Embedding.svelte`).
 - Map scrolling: a two-finger trackpad scroll pans the map; pinch (or Ctrl/Cmd + scroll) zooms. Upstream zooms on every scroll. Change in `packages/component/src/lib/embedding_view/EmbeddingViewImpl.svelte` (`onWheel`, `onPan`).
 - Color scheme: the Light/Dark choice from the side bar is saved in localStorage (`embedding-atlas-color-scheme`) and restored on load; with no saved choice the default is Dark (`utils/color_scheme.ts`, one line in `EmbeddingAtlas.svelte`).

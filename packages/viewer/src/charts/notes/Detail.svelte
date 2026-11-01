@@ -16,7 +16,7 @@
   function fields(): string[] {
     return [
       ...new Set(
-        [spec.titleField, ...(spec.metaFields ?? []), ...(spec.sections ?? []), spec.bodyField, ...(spec.linkFields ?? [])].filter(
+        [spec.titleField, spec.quoteField, ...(spec.metaFields ?? []), ...(spec.sections ?? []), spec.bodyField, ...(spec.linkFields ?? [])].filter(
           (f): f is string => f != null,
         ),
       ),
@@ -79,6 +79,11 @@
     <div class="flex flex-col gap-3 max-w-[70ch]">
       {#if spec.titleField != null && show(row[spec.titleField]) != null}
         <div class="font-semibold leading-snug">{show(row[spec.titleField])}</div>
+      {/if}
+      {#if spec.quoteField != null && show(row[spec.quoteField]) != null}
+        <blockquote class="text-2xl leading-snug font-serif border-l-4 border-slate-400 dark:border-slate-500 pl-4">
+          “{show(row[spec.quoteField])}”
+        </blockquote>
       {/if}
       {#if meta.length > 0}
         <div class="text-sm text-slate-500 dark:text-slate-400">{meta.join(", ")}</div>
