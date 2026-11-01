@@ -127,6 +127,7 @@ export type BuiltinChartState =
 // Chart builders
 
 registerChartBuilder({
+  name: "Count Plot",
   icon: "chart-h-bar",
   description: "Create a count plot of a field",
   ui: [
@@ -150,6 +151,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Histogram",
   icon: "chart-stacked",
   description: "Create a histogram of a field",
   ui: [
@@ -161,6 +163,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Line Chart",
   icon: "chart-line",
   description: "Create a line chart of two fields",
   ui: [
@@ -192,6 +195,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Cumulative",
   icon: "chart-ecdf",
   description: "Create a chart showing the empirical cumulative distribution (eCDF) of a field",
   ui: [
@@ -219,6 +223,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Heatmap",
   icon: "chart-heatmap",
   description: "Create a 2D heatmap of two fields",
   ui: [
@@ -261,6 +266,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Box Plot",
   icon: "chart-boxplot",
   description: "Create a box plot",
   ui: [
@@ -319,6 +325,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Bubble Chart",
   icon: "chart-bubble",
   description: "Create a bubble chart",
   ui: [
@@ -358,6 +365,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Map",
   icon: "chart-embedding",
   description: "Create an embedding view",
   ui: [
@@ -385,6 +393,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Parallel Axes",
   icon: "chart-parallel-coordinates",
   description: "Create a parallel coordinates plot of multiple fields",
   ui: [
@@ -411,6 +420,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Feature List",
   icon: "chart-features-list",
   description: "Create a searchable list of features with counts and cross-filtering",
   ui: [
@@ -461,6 +471,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "SQL Filter",
   icon: "chart-predicates",
   description: "Create a filter with custom SQL predicates",
   ui: [] as const,
@@ -471,6 +482,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Markdown",
   icon: "chart-markdown",
   description: "Create a view with markdown content",
   preview: false,
@@ -483,6 +495,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Field Viewer",
   icon: "chart-content-viewer",
   description: "Create a view that displays a given field's content for the last selected point",
   preview: false,
@@ -495,6 +508,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Custom Spec",
   icon: "chart-spec",
   description: "Create a chart with custom spec",
   preview: false,
@@ -503,6 +517,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Table",
   icon: "chart-table",
   description: "Create a table view with pagination",
   preview: false,
@@ -525,6 +540,7 @@ registerChartBuilder({
 });
 
 registerChartBuilder({
+  name: "Cards",
   icon: "chart-cards",
   description: "Create a card view with pagination",
   preview: false,

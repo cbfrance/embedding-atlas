@@ -141,8 +141,8 @@
           .map((x) => x.column_name)
           .filter((x) => !x.startsWith("__"));
         if (options.columns) {
-          let specifiedColumns = new Set(options.columns);
-          columnNames = columnNames.filter((x) => specifiedColumns.has(x));
+          let available = new Set(columnNames);
+          columnNames = options.columns.filter((x) => available.has(x));
         }
         // Filter out hidden columns
         columnNames = columnNames.filter((col) => options.columnStyles[col]?.display !== "hidden");

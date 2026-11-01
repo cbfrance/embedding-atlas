@@ -16,12 +16,13 @@ export function registerNotesCharts(registerChartType: Register, registerChartBu
   registerChartType("detail", Detail);
 
   registerChartBuilder({
+    name: "Detail",
     icon: "chart-content-viewer",
     description: "Create a pane that shows the last selected point in full",
     preview: false,
     ui: [
-      { label: "Title", field: { key: "title" } },
-      { label: "Body", field: { key: "body", required: true } },
+      { label: "Title", field: { key: "title", preferred: ["text", "title"] } },
+      { label: "Body", field: { key: "body", required: true, preferred: ["doc_text", "body", "text"] } },
     ] as const,
     create: ({ title, body }): DetailSpec | undefined => ({
       type: "detail",
@@ -32,11 +33,12 @@ export function registerNotesCharts(registerChartType: Register, registerChartBu
   });
 
   registerChartBuilder({
+    name: "Posters",
     icon: "chart-cards",
     description: "Create a grid of images for the filtered rows",
     preview: false,
     ui: [
-      { label: "Image", field: { key: "image", required: true } },
+      { label: "Image", field: { key: "image", required: true, preferred: ["poster", "image"] } },
       { label: "Label", field: { key: "label" } },
     ] as const,
     create: ({ image, label }): PosterGridSpec | undefined => ({
@@ -48,12 +50,13 @@ export function registerNotesCharts(registerChartType: Register, registerChartBu
   });
 
   registerChartBuilder({
+    name: "Notes",
     icon: "chart-content-viewer",
     description: "Create a notes editor for the last selected point",
     preview: false,
     ui: [
-      { label: "Key", field: { key: "key", required: true } },
-      { label: "Label", field: { key: "label" } },
+      { label: "Key", field: { key: "key", required: true, preferred: ["id"] } },
+      { label: "Label", field: { key: "label", preferred: ["doc_title", "title"] } },
     ] as const,
     create: ({ key, label }): NotesSpec | undefined => ({
       type: "notes",

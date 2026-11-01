@@ -71,6 +71,11 @@
         let current = currentValues[item.field.key];
         if (current != null && allowedColumns.findIndex(({ name }) => name == current) >= 0) {
           newValues[item.field.key] = current;
+        } else {
+          let preferred = (item.field.preferred ?? []).find((n) => allowedColumns.some(({ name }) => name == n));
+          if (preferred != null) {
+            newValues[item.field.key] = preferred;
+          }
         }
       } else if ("fields" in item) {
         let allowedColumns = filteredColumns(currentColumns, item.fields);
@@ -202,7 +207,7 @@
 </script>
 
 <Container width={width} height={height} scrollY={true} class="flex flex-col gap-2">
-  <div class="flex flex-wrap gap-2">
+  <div class="grid grid-cols-[repeat(auto-fill,minmax(5rem,1fr))] gap-2">
     {#each chartBuilders as type}
       {@const selected = builder == type}
       <button
@@ -210,13 +215,16 @@
           builder = type;
         }}
         title={type.description}
-        class="rounded-md border border-slate-200 dark:border-slate-700"
+        class="rounded-md border border-slate-200 dark:border-slate-700 flex flex-col items-center p-1 gap-0.5"
         class:!border-slate-600={selected}
         class:dark:!border-slate-400={selected}
         class:!bg-slate-100={selected}
         class:dark:!bg-slate-700={selected}
       >
         <ChartIcon type={type.icon} colorScheme={$colorScheme} />
+        {#if type.name != null}
+          <span class="text-xs text-slate-600 dark:text-slate-300 leading-tight text-center">{type.name}</span>
+        {/if}
       </button>
     {/each}
   </div>

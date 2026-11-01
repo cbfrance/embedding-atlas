@@ -16,6 +16,8 @@ export type UIElement =
         types?: JSType[] | null;
         /** Additional column filter, applied after `types`. */
         accept?: (column: ColumnDesc) => boolean;
+        /** Column names to pick by default, first match wins. */
+        preferred?: string[];
         /**
          * Key of an optional table element to source columns from (default: the chart's table).
          * The field is hidden and undefined until that table is selected; `required` then
@@ -85,6 +87,9 @@ type UnionToIntersection<U> = (U extends any ? (x: U) => void : never) extends (
 type UIValues<A extends readonly UIElement[]> = UnionToIntersection<UIValue<A[number]>>;
 
 export interface ChartBuilderDescription<Spec, UI extends readonly UIElement[]> {
+  /** A short name shown under the icon */
+  name?: string;
+
   /** An icon for the chart type */
   icon: string;
 

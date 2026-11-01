@@ -42,3 +42,6 @@ npm ci
 (cd packages/viewer && npm run build)
 rm -rf packages/backend/embedding_atlas/static && cp -r packages/viewer/dist packages/backend/embedding_atlas/static
 ```
+- Panel resize handles sit in the gap between panels (`DashboardChartPanel.svelte`, `RESIZER_OFFSET = -4`, `RESIZER_SIZE = 6`), so they no longer cover a panel's bottom controls such as the map's selection buttons.
+- The add-widget menu shows a name under each icon (`name` on `ChartBuilderDescription`). Builder fields can list `preferred` column names, picked by default when present: Detail picks `text` and `doc_text`, Notes picks `id` and `doc_title`.
+- Tables show `columns` in the order the spec lists them (upstream used dataset order).

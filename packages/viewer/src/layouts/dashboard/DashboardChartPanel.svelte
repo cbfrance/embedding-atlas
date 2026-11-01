@@ -14,8 +14,8 @@
   import type { LayoutProps } from "../layout.js";
   import { type Grid } from "./placement.js";
 
-  const RESIZER_OFFSET = 0;
-  const RESIZER_SIZE = 10;
+  const RESIZER_OFFSET = -4;
+  const RESIZER_SIZE = 6;
 
   interface Props {
     context: ChartContext;
